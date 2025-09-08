@@ -1,3 +1,5 @@
 [user]
 	email = 49481622+EmilWallberg@users.noreply.github.com
 	name = Emil Wallberg
+[pull]
+	ff = only
