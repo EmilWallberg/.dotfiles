@@ -1,7 +1,7 @@
 require("ziagord.remap")
 require("ziagord.lazy_init")
 require("ziagord.config")
-
+require("ziagord.wsl_init")
 
 local augroup = vim.api.nvim_create_augroup
 local ZiagordGroup = augroup("Ziagord", {})
@@ -25,3 +25,14 @@ autocmd('LspAttach', {
   end
 })
 
+local function is_wsl()
+    local f = io.open("/proc/version")
+    if not f then return false end
+    local v = f:read("*all")
+    f:close()
+    return v:lower():match("microsoft") ~= nil
+end
+
+if is_wsl() then
+    require("ziagord.wsl_init")
+end

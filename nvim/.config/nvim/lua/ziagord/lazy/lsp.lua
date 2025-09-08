@@ -23,6 +23,8 @@ return {
         "L3MON4D3/LuaSnip",
         "saadparwaiz1/cmp_luasnip",
         "j-hui/fidget.nvim",
+        (vim.fn.has 'win32' == 1 or vim.fn.has 'wsl' == 1)
+        and { 'GrzegorzKozub/ahk.nvim' } or {},
     },
 
     config = function()
