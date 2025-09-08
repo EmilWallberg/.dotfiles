@@ -1,7 +1,6 @@
 function ColorMyPencils(color)
-    color = color or "catppuccin"
+    color = color or "catppuccin-mocha"
     vim.cmd.colorscheme(color)
-    vim.cmd("TransparentEnable")
 end
 
 return {

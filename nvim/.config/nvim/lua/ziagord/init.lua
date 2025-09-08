@@ -1,7 +1,6 @@
 require("ziagord.remap")
 require("ziagord.lazy_init")
 require("ziagord.config")
-require("ziagord.wsl_init")
 
 local augroup = vim.api.nvim_create_augroup
 local ZiagordGroup = augroup("Ziagord", {})
