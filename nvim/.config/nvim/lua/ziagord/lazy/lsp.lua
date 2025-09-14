@@ -1,12 +1,12 @@
 local root_files = {
-  '.luarc.json',
-  '.luarc.jsonc',
-  '.luacheckrc',
-  '.stylua.toml',
-  'stylua.toml',
-  'selene.toml',
-  'selene.yml',
-  '.git',
+    '.luarc.json',
+    '.luarc.jsonc',
+    '.luacheckrc',
+    '.stylua.toml',
+    'stylua.toml',
+    'selene.toml',
+    'selene.yml',
+    '.git',
 }
 
 return {
@@ -24,7 +24,7 @@ return {
         "saadparwaiz1/cmp_luasnip",
         "j-hui/fidget.nvim",
         (vim.fn.has 'win32' == 1 or vim.fn.has 'wsl' == 1)
-        and { 'GrzegorzKozub/ahk.nvim' } or {},
+            and { 'GrzegorzKozub/ahk.nvim' } or {},
     },
 
     config = function()
@@ -53,23 +53,17 @@ return {
                     }
                 end,
 
-                zls = function()
+                gdscript = function()
                     local lspconfig = require("lspconfig")
-                    lspconfig.zls.setup({
-                        root_dir = lspconfig.util.root_pattern(".git", "build.zig", "zls.json"),
-                        settings = {
-                            zls = {
-                                enable_inlay_hints = true,
-                                enable_snippets = true,
-                                warn_style = true,
-                            },
-                        },
+                    lspconfig.gdscript.setup({
+                        cmd = { "godot-lsp" },  -- adjust path if necessary
+                        filetypes = { "gd" },
+                        root_dir = lspconfig.util.root_pattern("project.godot", ".git"),
+                        capabilities = capabilities,
                     })
-                    vim.g.zig_fmt_parse_errors = 0
-                    vim.g.zig_fmt_autosave = 0
-
                 end,
-                ["lua_ls"] = function()
+
+                lua_ls = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.lua_ls.setup {
                         capabilities = capabilities,
@@ -110,8 +104,8 @@ return {
                 { name = 'nvim_lsp' },
                 { name = 'luasnip' }, -- For luasnip users.
             }, {
-                { name = 'buffer' },
-            })
+                    { name = 'buffer' },
+                })
         })
 
         vim.diagnostic.config({
@@ -126,3 +120,4 @@ return {
             },
         })
     end
+}
