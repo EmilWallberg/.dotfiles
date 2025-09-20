@@ -1,4 +1,4 @@
-local root_files = {
+local root_markers = {
     '.luarc.json',
     '.luarc.jsonc',
     '.luacheckrc',
@@ -23,6 +23,7 @@ return {
         "L3MON4D3/LuaSnip",
         "saadparwaiz1/cmp_luasnip",
         "j-hui/fidget.nvim",
+        "zbirenbaum/copilot.lua", -- optional
         (vim.fn.has 'win32' == 1 or vim.fn.has 'wsl' == 1)
             and { 'GrzegorzKozub/ahk.nvim' } or {},
     },
@@ -30,86 +31,84 @@ return {
     config = function()
         require("conform").setup({
             formatters_by_ft = {
+                lua = { "stylua" },
+                gdscript = { "gdtoolkit" },
             }
         })
+
         local cmp = require('cmp')
         local cmp_lsp = require("cmp_nvim_lsp")
         local capabilities = vim.tbl_deep_extend(
             "force",
             {},
             vim.lsp.protocol.make_client_capabilities(),
-            cmp_lsp.default_capabilities())
+            cmp_lsp.default_capabilities()
+        )
 
         require("fidget").setup({})
         require("mason").setup()
         require("mason-lspconfig").setup({
-            ensure_installed = {
-                "lua_ls",
-            },
-            handlers = {
-                function(server_name) -- default handler (optional)
-                    require("lspconfig")[server_name].setup {
-                        capabilities = capabilities
-                    }
-                end,
+            ensure_installed = { "lua_ls" },
+        })
 
-                gdscript = function()
-                    local lspconfig = require("lspconfig")
-                    lspconfig.gdscript.setup({
-                        cmd = { "godot-lsp" },  -- adjust path if necessary
-                        filetypes = { "gd" },
-                        root_dir = lspconfig.util.root_pattern("project.godot", ".git"),
-                        capabilities = capabilities,
-                    })
-                end,
+        -- Global defaults for all servers
+        vim.lsp.config('*', {
+            capabilities = capabilities,
+        })
 
-                lua_ls = function()
-                    local lspconfig = require("lspconfig")
-                    lspconfig.lua_ls.setup {
-                        capabilities = capabilities,
-                        settings = {
-                            Lua = {
-                                format = {
-                                    enable = true,
-                                    -- Put format options here
-                                    -- NOTE: the value should be STRING!!
-                                    defaultConfig = {
-                                        indent_style = "space",
-                                        indent_size = "2",
-                                    }
-                                },
-                            }
+        -- Lua LSP config
+        vim.lsp.config('lua_ls', {
+            cmd = { 'lua-language-server' },
+            filetypes = { 'lua' },
+            root_markers = root_markers,
+            settings = {
+                Lua = {
+                    format = {
+                        enable = true,
+                        defaultConfig = {
+                            indent_style = "space",
+                            indent_size = "2",
                         }
-                    }
-                end,
+                    },
+                }
             }
         })
 
+        -- GDScript LSP config (manual)
+        vim.lsp.config('gdscript', {
+            cmd = { 'godot-wsl-lsp', '--useMirroredNetworking' },
+            filetypes = { 'gdscript' },
+            root_markers = { 'project.godot', '.git' },
+        })
+
+        -- Enable all configured servers
+        vim.lsp.enable({ 'lua_ls', 'gdscript' })
+
+        -- CMP setup
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
 
         cmp.setup({
             snippet = {
                 expand = function(args)
-                    require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+                    require('luasnip').lsp_expand(args.body)
                 end,
             },
             mapping = cmp.mapping.preset.insert({
                 ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
                 ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
                 ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-                ["<C-Space>"] = cmp.mapping.complete(),
+                ['<C-Space>'] = cmp.mapping.complete(),
             }),
             sources = cmp.config.sources({
                 { name = "copilot", group_index = 2 },
                 { name = 'nvim_lsp' },
-                { name = 'luasnip' }, -- For luasnip users.
+                { name = 'luasnip' },
             }, {
-                    { name = 'buffer' },
-                })
+                { name = 'buffer' },
+            })
         })
 
         vim.diagnostic.config({
-            -- update_in_insert = true,
             float = {
                 focusable = false,
                 style = "minimal",
