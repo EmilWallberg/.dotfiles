@@ -4,11 +4,15 @@ return {
     tag = "0.1.8",
 
     dependencies = {
-        "nvim-lua/plenary.nvim"
+        "nvim-lua/plenary.nvim",
+        "nvim-telescope/telescope-live-grep-args.nvim"
     },
 
     config = function()
-        require('telescope').setup({})
+        local telescope = require('telescope')
+        telescope.setup({})
+
+        telescope.load_extension("live_grep_args")
 
         local builtin = require('telescope.builtin')
         vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
