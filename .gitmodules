@@ -1,6 +1,3 @@
-[submodule "tmux/.config/tmux/plugins/tpm"]
-	path = tmux/.config/tmux/plugins/tpm
-	url = git@github.com:tmux-plugins/tpm.git
 [submodule "nvim/.config/nvim/lsp_addons/CC-Tweaked"]
 	path = nvim/.config/nvim/lsp_addons/CC-Tweaked
 	url = https://gitlab.com/carsakiller/cc-tweaked-documentation.git
