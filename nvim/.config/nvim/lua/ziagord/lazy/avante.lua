@@ -21,6 +21,7 @@ return {
         local docker_files
         if vim.fn.has("wsl") ~= 0 then
             docker_files = "/mnt/c/.docker_files"
+            os.execute([[export XDG_RUNTIME_DIR="/tmp/" ]])
         else
             docker_files = "$HOME/.docker_files"
         end
