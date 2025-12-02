@@ -24,6 +24,9 @@ autocmd('LspAttach', {
   end
 })
 
+vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
+vim.opt.undofile = true
+
 local function is_wsl()
     local f = io.open("/proc/version")
     if not f then return false end
