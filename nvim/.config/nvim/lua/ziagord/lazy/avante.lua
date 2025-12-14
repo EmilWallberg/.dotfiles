@@ -27,27 +27,27 @@ return {
         end
 
 
-        if not searxng_running then
-            print("Starting SearXNG container on port " .. searxng_port .. "...")
-            os.execute([[
-                mkdir -p ./searxng/config ./searxng/data
-                docker run --name searxng -d -p ]] .. searxng_port .. [[:8080 \
-                -v "]] .. docker_files .. [[/searxng/config/:/etc/searxng/" \
-                -v "]] .. docker_files .. [[/searxng/data/:/var/cache/searxng/" \
-                docker.io/searxng/searxng:latest
-            ]])
-        end
+        --if not searxng_running then
+        --    print("Starting SearXNG container on port " .. searxng_port .. "...")
+        --    os.execute([[
+        --        mkdir -p ./searxng/config ./searxng/data
+        --        docker run --name searxng -d -p ]] .. searxng_port .. [[:8080 \
+        --        -v "]] .. docker_files .. [[/searxng/config/:/etc/searxng/" \
+        --        -v "]] .. docker_files .. [[/searxng/data/:/var/cache/searxng/" \
+        --        docker.io/searxng/searxng:latest
+        --    ]])
+        --end
 
-        vim.fn.setenv("SEARXNG_API_URL", "http://" .. host .. ":" .. searxng_port .. "/search")
+        --vim.fn.setenv("SEARXNG_API_URL", "http://" .. host .. ":" .. searxng_port .. "/search")
 
         return {
             instructions_file = "avante.md",
             provider = "copilot",
 
-            web_search_engine = {
-                provider = "searxng",
-                proxy = nil,
-            },
+            --web_search_engine = {
+            --    provider = "searxng",
+            --    proxy = nil,
+            --},
 
             rag_service = {
                 enabled = true,
