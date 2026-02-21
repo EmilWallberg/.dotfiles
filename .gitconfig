@@ -1,10 +1,11 @@
-[user]
-	email = 49481622+EmilWallberg@users.noreply.github.com
-	name = Emil Wallberg
+[include]
+    path = ~/.gitconfig_local
+
 [pull]
-	ff = only
+    ff = only
+
 [filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true

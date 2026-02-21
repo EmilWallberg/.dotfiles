@@ -18,36 +18,29 @@ return {
         local searxng_running = handle:read("*l")
         handle:close()
 
-        local docker_files
-        if vim.fn.has("wsl") ~= 0 then
-            docker_files = "/mnt/c/.docker_files"
-            os.execute([[export XDG_RUNTIME_DIR="/tmp/" ]])
-        else
-            docker_files = "$HOME/.docker_files"
+        local docker_files = "$HOME/.docker_files"
+
+        if not searxng_running then
+            print("Starting SearXNG container on port " .. searxng_port .. "...")
+            os.execute([[
+                mkdir -p]] .. docker_files .. [[./searxng/config ./searxng/data
+                docker run --name searxng -d -p 127.0.0.1:]] .. searxng_port .. [[:8080 \
+                -v "]] .. docker_files .. [[/searxng/config/:/etc/searxng/" \
+                -v "]] .. docker_files .. [[/searxng/data/:/var/cache/searxng/" \
+                docker.io/searxng/searxng:latest
+            ]])
         end
 
-
-        --if not searxng_running then
-        --    print("Starting SearXNG container on port " .. searxng_port .. "...")
-        --    os.execute([[
-        --        mkdir -p ./searxng/config ./searxng/data
-        --        docker run --name searxng -d -p ]] .. searxng_port .. [[:8080 \
-        --        -v "]] .. docker_files .. [[/searxng/config/:/etc/searxng/" \
-        --        -v "]] .. docker_files .. [[/searxng/data/:/var/cache/searxng/" \
-        --        docker.io/searxng/searxng:latest
-        --    ]])
-        --end
-
-        --vim.fn.setenv("SEARXNG_API_URL", "http://" .. host .. ":" .. searxng_port .. "/search")
+        vim.fn.setenv("SEARXNG_API_URL", "http://127.0.0.1:" .. searxng_port .. "/search")
 
         return {
             instructions_file = "avante.md",
             provider = "copilot",
 
-            --web_search_engine = {
-            --    provider = "searxng",
-            --    proxy = nil,
-            --},
+            web_search_engine = {
+                provider = "searxng",
+                proxy = nil,
+            },
 
             rag_service = {
                 enabled = true,
@@ -55,14 +48,14 @@ return {
                 runner = "docker", -- Runner for the RAG service (can use docker or nix)
                 llm = { -- Configuration for the Language Model (LLM) used by the RAG service
                   provider = "ollama", -- The LLM provider ("ollama")
-                  endpoint = "http://localhost:11434", -- The LLM API endpoint for Ollama
+                  endpoint = "http://127.0.0.1:" .. ollama_port, -- The LLM API endpoint for Ollama
                   api_key = "", -- Ollama typically does not require an API key
                   model = "llama2", -- The LLM model name (e.g., "llama2", "mistral")
                   extra = nil, -- Extra configuration options for the LLM (optional) Kristin", -- Extra configuration options for the LLM (optional)
                 },
                 embed = { -- Embedding model configuration for RAG service
                     provider = "ollama", -- Embedding provider
-                    endpoint = "http://" .. host .. ":" .. ollama_port, -- Embedding API endpoint
+                    endpoint = "http://127.0.0.1:" .. ollama_port, -- Embedding API endpoint
                     api_key = "", -- Environment variable name for the embedding API key
                     model = "nomic-embed-text", -- Embedding model name
                     extra = { -- Extra configuration options for the Embedding model (optional)
