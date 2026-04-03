@@ -4,38 +4,58 @@ return {
         and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
         or "make",
     event = "VeryLazy",
-    version = false, -- never "*"
+    version = false,
 
     opts = (function()
-        -- Determine host for WSL2 or native Windows
-        local host = "localhost"
-
         local searxng_port = 8777
         local ollama_port = 11434
+        local docker_files = vim.fn.expand("$HOME/.docker_files")
 
-        -- Automatically start SearXNG Docker container if not running
+        -- Logic for SearXNG container
         local handle = io.popen('docker ps -q -f name=searxng')
         local searxng_running = handle:read("*l")
         handle:close()
 
-        local docker_files = "$HOME/.docker_files"
-
         if not searxng_running then
-            print("Starting SearXNG container on port " .. searxng_port .. "...")
-            os.execute([[
-                mkdir -p]] .. docker_files .. [[./searxng/config ./searxng/data
-                docker run --name searxng -d -p 127.0.0.1:]] .. searxng_port .. [[:8080 \
-                -v "]] .. docker_files .. [[/searxng/config/:/etc/searxng/" \
-                -v "]] .. docker_files .. [[/searxng/data/:/var/cache/searxng/" \
+            os.execute(string.format([[
+                mkdir -p %s/searxng/config %s/searxng/data
+                docker run --name searxng -d -p 127.0.0.1:%d:8080 \
+                -v "%s/searxng/config/:/etc/searxng/" \
+                -v "%s/searxng/data/:/var/cache/searxng/" \
                 docker.io/searxng/searxng:latest
-            ]])
+            ]], docker_files, docker_files, searxng_port, docker_files, docker_files))
         end
 
         vim.fn.setenv("SEARXNG_API_URL", "http://127.0.0.1:" .. searxng_port .. "/search")
 
         return {
-            instructions_file = "avante.md",
             provider = "copilot",
+            providers = {
+                 ollama = {
+                    endpoint = "http://127.0.0.1:" .. ollama_port,
+                    model = "qwq:32b",
+                  },
+            },
+            instructions_file = "avante.md",
+
+            -- Integration Hooks for MCPHub
+            system_prompt = function()
+                local hub = require("mcphub").get_hub_instance()
+                return hub:get_active_servers_prompt() or ""
+            end,
+
+            custom_tools = function()
+                return {
+                    require("mcphub.extensions.avante").mcp_tool(),
+                }
+            end,
+
+            -- Disable built-ins to avoid duplication with MCP Neovim server
+            disabled_tools = {
+                "list_files", "search_files", "read_file", "create_file",
+                "rename_file", "delete_file", "create_dir", "rename_dir",
+                "delete_dir", "bash",
+            },
 
             web_search_engine = {
                 provider = "searxng",
@@ -44,25 +64,21 @@ return {
 
             rag_service = {
                 enabled = true,
-                host_mount = os.getenv("DEV_PATH"), -- Host mount path for the rag service (Docker will mount this path)
-                runner = "docker", -- Runner for the RAG service (can use docker or nix)
-                llm = { -- Configuration for the Language Model (LLM) used by the RAG service
-                  provider = "ollama", -- The LLM provider ("ollama")
-                  endpoint = "http://127.0.0.1:" .. ollama_port, -- The LLM API endpoint for Ollama
-                  api_key = "", -- Ollama typically does not require an API key
-                  model = "llama2", -- The LLM model name (e.g., "llama2", "mistral")
-                  extra = nil, -- Extra configuration options for the LLM (optional) Kristin", -- Extra configuration options for the LLM (optional)
+                host_mount = os.getenv("DEV_PATH"),
+                runner = "docker",
+                llm = {
+                    provider = "ollama",
+                    endpoint = "http://127.0.0.1:" .. ollama_port,
+                    model = "llama2",
+                    api_key = "",
                 },
-                embed = { -- Embedding model configuration for RAG service
-                    provider = "ollama", -- Embedding provider
-                    endpoint = "http://127.0.0.1:" .. ollama_port, -- Embedding API endpoint
-                    api_key = "", -- Environment variable name for the embedding API key
-                    model = "nomic-embed-text", -- Embedding model name
-                    extra = { -- Extra configuration options for the Embedding model (optional)
-                      embed_batch_size = 10,
-                    },
+                embed = {
+                    provider = "ollama",
+                    endpoint = "http://127.0.0.1:" .. ollama_port,
+                    model = "nomic-embed-text",
+                    api_key = "",
+                    extra = { embed_batch_size = 10 },
                 },
-                docker_extra_args = "", -- Extra arguments to pass to the docker command
             },
         }
     end)(),
@@ -80,7 +96,6 @@ return {
         "zbirenbaum/copilot.lua",
         {
             "HakonHarnes/img-clip.nvim",
-            event = "VeryLazy",
             opts = {
                 default = {
                     embed_image_as_base64 = false,

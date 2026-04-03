@@ -17,9 +17,18 @@ if command -v tmux &>/dev/null && [ -z "$TMUX" ]; then
     fi
 fi
 
+if [ -f "$HOME/.zsh_local" ]; then
+    source "$HOME/.zsh_local"
+fi
+
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 export PATH="$HOME/bin:$PATH"
+
+if [ ! -d "$XDG_RUNTIME_DIR" ]; then
+    export XDG_RUNTIME_DIR="/tmp"
+fi
+export TMPDIR="/tmp"
 
 ZSH_THEME="robbyrussell"
 

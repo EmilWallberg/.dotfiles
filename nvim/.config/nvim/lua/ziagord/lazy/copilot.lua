@@ -1,24 +1,42 @@
 return {
-    "copilotlsp-nvim/copilot-lsp",
-    init = function()
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    dependencies = {
+        "copilotlsp-nvim/copilot-lsp", -- Required for the NES functionality you're using
+    },
+    config = function()
+        -- 1. Initialize the core Copilot engine
+        require("copilot").setup({
+            -- You can add core copilot.lua options here
+            auth_provider_url = os.getenv("GHE_URL") or "https://github.com/",
+            suggestion = { enabled = false }, -- Disable built-in suggestions if using NES
+            panel = { enabled = false },
+        })
+
+        -- 2. Configure Copilot NES variables
         vim.g.copilot_nes_debounce = 500
-        vim.lsp.enable("copilot_ls")
+        -- Note: Ensure "copilot_ls" is handled by your LSP manager (like mason-lspconfig)
+        -- or manually enabled if not using one:
+        -- vim.lsp.enable("copilot_ls") 
+
+        -- 3. Your custom Tab logic
         vim.keymap.set("n", "<tab>", function()
             local bufnr = vim.api.nvim_get_current_buf()
             local state = vim.b[bufnr].nes_state
+
             if state then
-                -- Try to jump to the start of the suggestion edit.
-                -- If already at the start, then apply the pending suggestion and jump to the end of the edit.
+                -- NES Logic: Jump to start, or apply and jump to end
                 local _ = require("copilot-lsp.nes").walk_cursor_start_edit()
-                    or (
-                        require("copilot-lsp.nes").apply_pending_nes()
-                        and require("copilot-lsp.nes").walk_cursor_end_edit()
-                    )
+                or (
+                require("copilot-lsp.nes").apply_pending_nes()
+                and require("copilot-lsp.nes").walk_cursor_end_edit()
+            )
                 return nil
             else
-                -- Resolving the terminal's inability to distinguish between `TAB` and `<C-i>` in normal mode
+                -- Fallback to jump forward in changelist (C-i)
                 return "<C-i>"
             end
-        end, { desc = "Accept Copilot NES suggestion", expr = true })
+        end, { desc = "Accept Copilot NES suggestion", expr = true, silent = true })
     end,
 }
