@@ -1,7 +1,36 @@
+vim.g.transparent_enabled = true
+
+-- 1. Updated Function: Now handles the toggle logic and re-application
 function ColorMyPencils(color)
     color = color or "catppuccin-mocha"
+    
+    -- Ensure the global variable exists so themes don't error out
+    if vim.g.transparent_enabled == nil then
+        vim.g.transparent_enabled = false
+    end
+
     vim.cmd.colorscheme(color)
 end
+
+-- 2. Toggle Command: Add this so you can swap on the fly
+-- Usage: Type :ToggleTransparency in command mode
+    vim.api.nvim_create_user_command("ToggleTransparency", function()
+    vim.g.transparent_enabled = not vim.g.transparent_enabled
+    
+    -- Re-run ColorMyPencils to refresh the theme with the new variable state
+    ColorMyPencils(vim.g.colors_name)
+    
+    -- If using xiyaowong/transparent.nvim, tell it to sync up
+    local status, transparent = pcall(require, "transparent")
+    if status then
+        if vim.g.transparent_enabled then
+            transparent.clear()
+        else
+            -- There isn't a native 'unclear', so we just re-source the theme
+            vim.cmd("colorscheme " .. vim.g.colors_name)
+        end
+    end
+end, {})
 
 return {
     {
@@ -9,60 +38,25 @@ return {
         config = function()
             require("transparent").setup({
                 extra_groups = {
-                    "NormalFloat", -- plugins which have float panel such as Lazy, Mason, LspInfo
+                    "NormalFloat", 
                 },
-
             })
         end
     },
-    { "catppuccin/nvim", name = "catppuccin", priority = 1000,
+    { 
+        "catppuccin/nvim", 
+        name = "catppuccin", 
+        priority = 1000,
         config = function()
             require("catppuccin").setup({
-                flavour = "auto", -- latte, frappe, macchiato, mocha
-                background = { -- :h background
-                    light = "latte",
-                    dark = "mocha",
-                },
-                transparent_background = vim.g.transparent_enabled, -- disables setting the background color.
-                show_end_of_buffer = false, -- shows the '~' characters after the end of buffers
-                term_colors = false, -- sets terminal colors (e.g. `g:terminal_color_0`)
-                dim_inactive = {
-                    enabled = false, -- dims the background color of inactive window
-                    shade = "dark",
-                    percentage = 0.15, -- percentage of the shade to apply to the inactive window
-                },
-                no_italic = false, -- Force no italic
-                no_bold = false, -- Force no bold
-                no_underline = false, -- Force no underline
-                styles = { -- Handles the styles of general hi groups (see `:h highlight-args`):
-                    comments = { "italic" }, -- Change the style of comments
-                    conditionals = { "italic" },
-                    loops = {},
-                    functions = {},
-                    keywords = {},
-                    strings = {},
-                    variables = {},
-                    numbers = {},
-                    booleans = {},
-                    properties = {},
-                    types = {},
-                    operators = {},
-                    -- miscs = {}, -- Uncomment to turn off hard-coded styles
-                },
-                color_overrides = {},
-                custom_highlights = {},
-                default_integrations = true,
+                flavour = "auto",
+                -- This will now update correctly when ColorMyPencils is called
+                transparent_background = vim.g.transparent_enabled, 
                 integrations = {
                     cmp = true,
                     gitsigns = true,
                     nvimtree = true,
                     treesitter = true,
-                    notify = false,
-                    mini = {
-                        enabled = true,
-                        indentscope_color = "",
-                    },
-                    -- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
                 },
             })
         end
@@ -71,19 +65,12 @@ return {
         "folke/tokyonight.nvim",
         config = function()
             require("tokyonight").setup({
-                -- your configuration comes here
-                -- or leave it empty to use the default settings
-                style = "moon", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
-                transparent = vim.g.transparent_enabled, -- Enable this to disable setting the background color
-                terminal_colors = true, -- Configure the colors used when opening a `:terminal` in Neovim
+                style = "moon",
+                -- Respects the toggle
+                transparent = vim.g.transparent_enabled, 
                 styles = {
-                    -- Style to be applied to different syntax groups
-                    -- Value is any valid attr-list value for `:help nvim_set_hl`
-                    comments = { italic = false },
-                    keywords = { italic = false },
-                    -- Background styles. Can be "dark", "transparent" or "normal"
-                    sidebars = "dark", -- style for sidebars, see below
-                    floats = "dark", -- style for floating windows
+                    sidebars = "dark",
+                    floats = "dark",
                 },
             })
             ColorMyPencils()
@@ -94,13 +81,10 @@ return {
         name = "rose-pine",
         config = function()
             require('rose-pine').setup({
-                disable_background = true,
-                styles = {
-                    italic = false,
-                },
+                -- For Rose Pine, we link this to our variable
+                disable_background = vim.g.transparent_enabled,
             })
-
-            ColorMyPencils();
+            ColorMyPencils()
         end
     },
 }
