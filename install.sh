@@ -1,26 +1,72 @@
 #!/usr/bin/env bash
 
 DOTFILES_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+BLACKLIST=(".git" "LICENSE" "install.sh" "home_files")
 
-echo "🚀 Updating Dotfiles..."
+is_blacklisted() {
+    local item="$1"
+    for bl in "${BLACKLIST[@]}"; do
+        [[ "$item" == "$bl" ]] && return 0
+    done
+    return 1
+}
 
-# 1. Use Stow for the standard .config structures
-# This handles: ~/.config/nvim, ~/.config/tmux, etc.
-packages=(hypr nvim tmux wezterm)
+# Function to handle safe symlinking
+confirm_and_link() {
+    local src="$1"
+    local dst="$2"
 
-for pkg in "${packages[@]}"; do
-    if [ -d "$DOTFILES_DIR/$pkg" ]; then
-        echo "📦 Stowing $pkg..."
-        stow -v -R -t "$HOME" "$pkg"
+    if [ -d "$dst" ] && [ ! -L "$dst" ]; then
+        echo "⚠️  Found existing directory at $dst"
+        read -p "   Overwrite with symlink? [y/N] " confirm
+        if [[ "$confirm" != [yY] ]]; then
+            echo "   ⏭️  Skipping $dst"
+            return
+        fi
+    fi
+
+    mkdir -p "$(dirname "$dst")"
+    rm -rf "$dst"
+    ln -sf "$src" "$dst"
+}
+
+echo "🧹 Checking dependencies..."
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "🛠️ Oh My Zsh not found. Installing..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc
+else
+    echo "✅ Oh My Zsh is already installed."
+fi
+
+echo "🚀 Auto-deploying Dotfiles..."
+
+# 1. Auto-Link folders to ~/.config/
+for dir in "$DOTFILES_DIR"/*; do
+    name=$(basename "$dir")
+    if [ -d "$dir" ] && ! is_blacklisted "$name"; then
+        echo "📦 Processing: $name"
+        confirm_and_link "$dir" "$HOME/.config/$name"
     fi
 done
 
-# 2. Manual Symlinks (The "Non-Stow" files)
+# 2. Link files from home_files/ to ~/
+if [ -d "$DOTFILES_DIR/home_files" ]; then
+    echo "🏠 Linking home files..."
+    find "$DOTFILES_DIR/home_files" -maxdepth 1 -type f | while read -r file; do
+        filename=$(basename "$file")
+        # For individual files, we usually just force link, 
+        # but let's be safe here too.
+        if [ -f "$HOME/$filename" ] && [ ! -L "$HOME/$filename" ]; then
+             echo "🔗 Linking $filename to ~/"
+             ln -sf -b "$file" "$HOME/$filename" # -b creates a backup (e.g. .zshrc~)
+        else
+             ln -sf "$file" "$HOME/$filename"
+        fi
+    done
+fi
 
-echo "🔗 Linking .zshrc..."
-ln -sf "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
+# 3. THE MAGIC: Auto-Chmod all scripts
+echo "🔧 Making scripts executable..."
+find "$DOTFILES_DIR" -type f -name "*.sh" -exec chmod +x {} +
 
-echo "🔗 Linking .gitconfig..."
-ln -sf "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
-
-echo "✨ Done! Restart your shell or run 'source ~/.zshrc'"
+echo "✨ Done!"

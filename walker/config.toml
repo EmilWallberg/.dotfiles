@@ -1,0 +1,6 @@
+[providers]
+default = ["desktopapplications", "calc", "websearch", "menus"]
+
+[[providers.prefixes]]
+prefix = "rdp"
+provider = "menus:rdp"

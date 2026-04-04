@@ -41,7 +41,7 @@ zstyle ':omz:update' mode auto      # update automatically without asking
 
 ENABLE_CORRECTION="true"
 
-ZSH_CUSTOM=~/.dotfiles/zsh/custom
+ZSH_CUSTOM="$HOME/.config/zsh"
 
 plugins=(git)
 
