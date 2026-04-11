@@ -3,23 +3,31 @@ vim.g.transparent_enabled = true
 -- 1. Updated Function: Now handles the toggle logic and re-application
 function ColorMyPencils(color)
     color = color or "catppuccin-mocha"
-    
-    -- Ensure the global variable exists so themes don't error out
+
     if vim.g.transparent_enabled == nil then
         vim.g.transparent_enabled = false
     end
 
     vim.cmd.colorscheme(color)
+
+    -- Pull the color from LineNr
+    local column_fg = vim.api.nvim_get_hl(0, { name = 'LineNr' }).fg
+
+    -- Tell the plugin to use this color
+    vim.api.nvim_set_hl(0, "VirtColumn", { fg = column_fg })
+    
+    -- Ensure the default Neovim ColorColumn is hidden so it doesn't clash
+    vim.api.nvim_set_hl(0, "ColorColumn", { bg = "none" })
 end
 
 -- 2. Toggle Command: Add this so you can swap on the fly
 -- Usage: Type :ToggleTransparency in command mode
-    vim.api.nvim_create_user_command("ToggleTransparency", function()
+vim.api.nvim_create_user_command("ToggleTransparency", function()
     vim.g.transparent_enabled = not vim.g.transparent_enabled
-    
+
     -- Re-run ColorMyPencils to refresh the theme with the new variable state
     ColorMyPencils(vim.g.colors_name)
-    
+
     -- If using xiyaowong/transparent.nvim, tell it to sync up
     local status, transparent = pcall(require, "transparent")
     if status then
@@ -86,5 +94,13 @@ return {
             })
             ColorMyPencils()
         end
+    },
+    {
+        "lukas-reineke/virt-column.nvim",
+        -- We'll keep the setup simple here
+        opts = {
+            char = "│",
+            virtcolumn = "80",
+        },
     },
 }

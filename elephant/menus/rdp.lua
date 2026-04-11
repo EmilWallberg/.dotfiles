@@ -30,7 +30,8 @@ function GetEntries()
                 local cmd = string.format(
                     "{ " ..
                     "P=$(%s show rdp/%s 2>/dev/null); " ..
-                    "printf \"/u:%s\\n/p:$P\\n/v:%s\\n/cert:ignore\\n/dynamic-resolution\\n/floatbar\\n/clipboard\\n\" | %s /args-from:stdin & " ..
+                    "printf \"/u:%s\\n/p:$P\\n/v:%s\\n/cert:ignore\\n/dynamic-resolution\\n/floatbar\\n/clipboard\\n" ..
+                    "/gfx:avc444\\n/gfx-h264:avc444\\n/network:lan\\n/gdi:hw\\n/video\\n\" | %s /args-from:stdin & " ..
                     "} >> /tmp/rdp_final.log 2>&1 &",
                     pass_bin, account, user, ip, rdp_bin
                 )

@@ -1,5 +1,6 @@
 # Theme
 theme = TokyoNight Night
+background = #000000
 
 # Glassy Aesthetics
-background-opacity = 0.6
+background-opacity = 0.4
