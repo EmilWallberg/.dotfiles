@@ -1,0 +1,34 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // Default model used when OpenCode starts.
+  "model": "ollama/qwen3:8b",
+  "small_model": "ollama/qwen3:8b",
+
+  // OpenAI-compatible local provider backed by Ollama.
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": {
+        "baseURL": "http://host.docker.internal:11434/v1"
+      },
+      "models": {
+        "qwen3:8b": {
+          "name": "Qwen3 8B"
+        },
+        "gpt-oss:20b": {
+          "name": "GPT OSS 20B"
+        },
+        "gemma3": {
+          "name": "Gemma 3"
+        }
+      }
+    }
+  }
+
+  // Suggested agent workflow:
+  // - Plan / architecture: ollama/gpt-oss:20b
+  // - Build / coding:      ollama/qwen3:8b
+  // - Review / testing:    ollama/gemma3
+}

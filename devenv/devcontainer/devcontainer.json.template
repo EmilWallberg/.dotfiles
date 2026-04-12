@@ -1,0 +1,12 @@
+{
+  "name": "${project_name}",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "containerEnv": {
+    "OPENAI_BASE_URL": "${ollama_url}",
+    "OPENAI_API_KEY": "ollama"
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "remoteUser": "dev"
+}

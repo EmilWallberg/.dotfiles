@@ -21,6 +21,12 @@ if [ -f "$HOME/.zsh_local" ]; then
     source "$HOME/.zsh_local"
 fi
 
+export DEV_MODEL_FILE="$HOME/llms/models/Qwen3.5-27B/Qwen3.5-27B-UD-IQ3_XXS.gguf"
+export DEV_LLAMACPP_IMAGE="local/llama.cpp:server-cuda"
+export DEV_LLAMACPP_HOST_PORT=11434
+export DEV_REMOTE_USER=vscode
+export DEVUP_FORCE=1
+
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 export PATH="$HOME/bin:$PATH"
@@ -48,4 +54,5 @@ plugins=(git)
 source $ZSH/oh-my-zsh.sh
 
 export PATH="$PATH:$(go env GOPATH)/bin"
+
 [ -f /opt/miniforge/etc/profile.d/conda.sh ] && source /opt/miniforge/etc/profile.d/conda.sh
