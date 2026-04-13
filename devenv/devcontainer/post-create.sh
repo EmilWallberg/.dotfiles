@@ -85,27 +85,37 @@ main() {
     install -d -m 755 "$HOME/.local/bin"
     install -d -m 755 "$HOME/.cache"
 
-    # Sync the entire ~/.config tree from the snapshot.
-    # Add exclude patterns here for container-local config you do not want overwritten.
-    if [[ -d "$snapshot_dir/.config" ]]; then
-        log_info "Syncing entire ~/.config from snapshot"
+    # Disabled: configs mounted live by devcontainer.json.template, no snapshot sync to ~/.config for opencode, nvim, zsh, tmux
+    # if [[ -d "$snapshot_dir/.config" ]]; then
+    #     log_info "Syncing entire ~/.config from snapshot"
+    #     sync_dir \
+    #         "$snapshot_dir/.config" \
+    #         "$HOME/.config" \
+    #         "opencode" \
+    #         "Code" \
+    #         "github-copilot"
+    # fi
 
-        sync_dir \
-            "$snapshot_dir/.config" \
-            "$HOME/.config" \
-            "opencode" \
-            "Code" \
-            "github-copilot"
+    # Pre-install Neovim plugins if nvim was copied
+    if command -v nvim >/dev/null 2>&1; then
+        log_info "Syncing Neovim plugins..."
+        nvim --headless "+Lazy! sync" +qa || true
     fi
 
     # Copy everything else from the snapshot root into $HOME, except .config.
     local entry
     shopt -s dotglob nullglob
     for entry in "$snapshot_dir"/*; do
-        [[ "$(basename "$entry")" == ".config" ]] && continue
+        name="$(basename "$entry")"
+        [[ "$name" == ".config" ]] && continue
+        [[ "$name" == ".gitconfig" ]] && continue
+        [[ "$name" == ".gitconfig_local" ]] && continue
+        [[ "$name" == ".zshrc" ]] && continue
+        [[ "$name" == ".zsh_local" ]] && continue
+        [[ "$name" == "home_files" ]] && continue
 
-        local target="$HOME/$(basename "$entry")"
-        log_info "Installing $(basename "$entry") into home"
+        local target="$HOME/$name"
+        log_info "Installing $name into home"
         copy_path "$entry" "$target"
     done
     shopt -u dotglob nullglob

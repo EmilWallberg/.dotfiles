@@ -1,12 +1,36 @@
 {
-  "name": "${project_name}",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
-  "containerEnv": {
-    "OPENAI_BASE_URL": "${ollama_url}",
-    "OPENAI_API_KEY": "ollama"
-  },
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
-  "remoteUser": "dev"
+    "name": "${PROJECT_NAME}",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
+    },
+    "mounts": [
+        "source=${env:HOME}/.local/share/nvim,target=/home/${REMOTE_USER}/.local/share/nvim,type=bind,consistency=cached",
+        "source=${env:HOME}/.local/share/opencode,target=/home/${REMOTE_USER}/.local/share/opencode,type=bind,consistency=cached",
+        "source=${env:HOME}/.agents,target=/home/${REMOTE_USER}/.agents,type=bind,consistency=cached",
+        "source=${env:HOME}/.config/nvim,target=/home/${REMOTE_USER}/.config/nvim,type=bind,consistency=cached",
+        "source=${env:HOME}/.config/zsh,target=/home/${REMOTE_USER}/.config/zsh,type=bind,consistency=cached",
+        "source=${env:HOME}/.config/tmux,target=/home/${REMOTE_USER}/.config/tmux,type=bind,consistency=cached",
+        "source=${env:HOME}/.config/opencode,target=/home/${REMOTE_USER}/.config/opencode,type=bind,consistency=cached",
+        "source=${env:HOME}/.gitconfig,target=/home/${REMOTE_USER}/.gitconfig,type=bind,readonly",
+        "source=${env:HOME}/.gitconfig_local,target=/home/${REMOTE_USER}/.gitconfig_local,type=bind,readonly",
+        "source=${env:HOME}/.zshrc,target=/home/${REMOTE_USER}/.zshrc,type=bind,readonly",
+    ],
+    "containerEnv": {
+        "LLAMACPP_URL": "${LLAMACPP_URL}",
+        "LLAMACPP_API_KEY": "${LLAMACPP_API_KEY}",
+        "LLAMACPP_MODEL_ALIAS": "${LLAMACPP_MODEL_ALIAS}",
+        "OPENCODE_PROVIDER_ID": "${OPENCODE_PROVIDER_ID}",
+        "OPENCODE_MODEL": "${OPENCODE_MODEL}",
+        "OPENCODE_SMALL_MODEL": "${OPENCODE_SMALL_MODEL}",
+        "SHELL": "/usr/bin/zsh"
+    },
+    // Essential for Linux to resolve host.docker.internal
+    "runArgs": [
+        "--network=llm-net"
+    ],
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+    "remoteUser": "${REMOTE_USER}"
 }

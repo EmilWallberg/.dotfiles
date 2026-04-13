@@ -1,0 +1,25 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "model": "{env:OPENCODE_MODEL}",
+    "small_model": "{env:OPENCODE_SMALL_MODEL}",
+    "plugin": [
+      "opencode-websearch",
+      "caveman"
+    ],
+    "provider": {
+        "llama-local": {
+            "name": "Llama.cpp (RTX5080)",
+            "npm": "@ai-sdk/openai-compatible",
+            "options": {
+                "baseURL": "{env:LLAMACPP_URL}",
+                "apiKey": "{env:LLAMACPP_API_KEY}",
+                "websearch": "auto"
+            },
+            "models": {
+                "qwen35-27b-local": {
+                    "name": "Qwen3.5-27B UD IQ3_XXS"
+                }
+            }
+        }
+    }
+}

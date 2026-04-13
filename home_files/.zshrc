@@ -21,10 +21,12 @@ if [ -f "$HOME/.zsh_local" ]; then
     source "$HOME/.zsh_local"
 fi
 
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+
 export DEV_MODEL_FILE="$HOME/llms/models/Qwen3.5-27B/Qwen3.5-27B-UD-IQ3_XXS.gguf"
 export DEV_LLAMACPP_IMAGE="local/llama.cpp:server-cuda"
 export DEV_LLAMACPP_HOST_PORT=11434
-export DEV_REMOTE_USER=vscode
+export DEV_REMOTE_USER=dev
 export DEVUP_FORCE=1
 
 # Path to your Oh My Zsh installation.
