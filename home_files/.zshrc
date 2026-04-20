@@ -23,7 +23,7 @@ fi
 
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 
-export DEV_MODEL_FILE="$HOME/llms/models/Qwen3.5-27B/Qwen3.5-27B-UD-IQ3_XXS.gguf"
+export DEV_MODEL_ROOT="$HOME/.llms/models"
 export DEV_LLAMACPP_IMAGE="local/llama.cpp:server-cuda"
 export DEV_LLAMACPP_HOST_PORT=11434
 export DEV_REMOTE_USER=dev
@@ -54,7 +54,5 @@ ZSH_CUSTOM="$HOME/.config/zsh"
 plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
-
-export PATH="$PATH:$(go env GOPATH)/bin"
 
 [ -f /opt/miniforge/etc/profile.d/conda.sh ] && source /opt/miniforge/etc/profile.d/conda.sh
