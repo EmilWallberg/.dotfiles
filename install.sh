@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 DOTFILES_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
-BLACKLIST=(".git" "LICENSE" "install.sh" "home_files")
+BLACKLIST=(".git" "LICENSE" "install.sh" "home_files" "home_dirs")
 
 is_blacklisted() {
     local item="$1"
@@ -65,7 +65,27 @@ if [ -d "$DOTFILES_DIR/home_files" ]; then
     done
 fi
 
-# 3. THE MAGIC: Auto-Chmod all scripts
+# 3. Link dirs from home_dirs/ to ~/
+if [ -d "$DOTFILES_DIR/home_dirs" ]; then
+    echo "🏠 Linking home directories..."
+    for dir in "$DOTFILES_DIR/home_dirs"/*/; do
+        name=$(basename "$dir")
+        dst="$HOME/$name"
+        if [ -d "$dst" ] && [ ! -L "$dst" ]; then
+            echo "⚠️  Found existing directory at $dst"
+            read -p "   Overwrite with symlink? [y/N] " confirm
+            if [[ "$confirm" != [yY] ]]; then
+                echo "   ⏭️  Skipping $dst"
+                continue
+            fi
+        fi
+        echo "🔗 Linking $name to ~/"
+        rm -rf "$dst"
+        ln -sf "$dir" "$dst"
+    done
+fi
+
+# 4. THE MAGIC: Auto-Chmod all scripts
 echo "🔧 Making scripts executable..."
 find "$DOTFILES_DIR" -type f -name "*.sh" -exec chmod +x {} +
 

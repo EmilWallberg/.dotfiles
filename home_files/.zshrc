@@ -56,3 +56,13 @@ plugins=(git)
 source $ZSH/oh-my-zsh.sh
 
 [ -f /opt/miniforge/etc/profile.d/conda.sh ] && source /opt/miniforge/etc/profile.d/conda.sh
+
+# opencode
+export PATH=/home/emiwa22/.opencode/bin:$PATH
+
+# bun completions
+[ -s "/home/emiwa22/.bun/_bun" ] && source "/home/emiwa22/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"

@@ -1,0 +1,36 @@
+{
+    "name": ".dotfiles",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
+    },
+    "mounts": [
+        "source=${env:HOME}/.local/share/nvim,target=/home/dev/.local/share/nvim,type=bind,consistency=cached",
+        "source=${env:HOME}/.local/share/opencode,target=/home/dev/.local/share/opencode,type=bind,consistency=cached",
+        "source=${env:HOME}/.agents,target=/home/dev/.agents,type=bind,consistency=cached",
+        "source=${env:HOME}/.config/nvim,target=/home/dev/.config/nvim,type=bind,consistency=cached",
+        "source=${env:HOME}/.config/zsh,target=/home/dev/.config/zsh,type=bind,consistency=cached",
+        "source=${env:HOME}/.config/tmux,target=/home/dev/.config/tmux,type=bind,consistency=cached",
+        "source=${env:HOME}/.config/opencode,target=/home/dev/.config/opencode,type=bind,consistency=cached",
+        "source=${env:HOME}/.gitconfig,target=/home/dev/.gitconfig,type=bind,readonly",
+        "source=${env:HOME}/.gitconfig_local,target=/home/dev/.gitconfig_local,type=bind,readonly",
+        "source=${env:HOME}/.zshrc,target=/home/dev/.zshrc,type=bind,readonly"
+    ],
+    "containerEnv": {
+        "LLAMACPP_URL": "http://llama-server:8080/v1",
+        "LLAMACPP_API_KEY": "llamacpp",
+        "LLAMACPP_MODEL_ALIAS": "qwen35-27b-local",
+        "OPENCODE_PROVIDER_ID": "llama-local",
+        "OPENCODE_MODEL": "llama-local/qwen35-27b-local",
+        "OPENCODE_SMALL_MODEL": "llama-local/qwen35-27b-local",
+        "SHELL": "/usr/bin/zsh"
+    },
+    // Essential for Linux to resolve host.docker.internal
+    "runArgs": [
+        "--network=llm-net"
+    ],
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+    "remoteUser": "dev"
+}

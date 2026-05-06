@@ -16,7 +16,7 @@
         "source=${env:HOME}/.config/opencode,target=/home/${REMOTE_USER}/.config/opencode,type=bind,consistency=cached",
         "source=${env:HOME}/.gitconfig,target=/home/${REMOTE_USER}/.gitconfig,type=bind,readonly",
         "source=${env:HOME}/.gitconfig_local,target=/home/${REMOTE_USER}/.gitconfig_local,type=bind,readonly",
-        "source=${env:HOME}/.zshrc,target=/home/${REMOTE_USER}/.zshrc,type=bind,readonly",
+        "source=${env:HOME}/.zshrc,target=/home/${REMOTE_USER}/.zshrc,type=bind,readonly"
     ],
     "containerEnv": {
         "LLAMACPP_URL": "${LLAMACPP_URL}",
@@ -29,7 +29,8 @@
     },
     // Essential for Linux to resolve host.docker.internal
     "runArgs": [
-        "--network=llm-net"
+      "--gpus=all",
+      "--network=llm-net"${EXTRA_RUN_ARGS}
     ],
     "postCreateCommand": "bash .devcontainer/post-create.sh",
     "remoteUser": "${REMOTE_USER}"
